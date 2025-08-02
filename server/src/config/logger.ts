@@ -1,0 +1,79 @@
+console.log("logger config");
+
+import winston from "winston";
+import "winston-mongodb";
+
+// MongoDB connection URL from environment or default
+const MONGODB_URL = process.env.DATABASE_URL || "mongodb://localhost:27017/mern_template";
+
+// Custom format for console logging
+const consoleFormat = winston.format.combine(
+  winston.format.timestamp({
+    format: "YYYY-MM-DD HH:mm:ss",
+  }),
+  winston.format.errors({ stack: true }),
+  winston.format.colorize(),
+  winston.format.printf(({ timestamp, level, message, stack }) => {
+    return `${timestamp} [${level}]: ${stack || message}`;
+  })
+);
+
+// Custom format for MongoDB logging
+const mongoFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json()
+);
+
+// Create transports array
+const transports: winston.transport[] = [];
+
+// Console transport
+transports.push(
+  new winston.transports.Console({
+    format: consoleFormat,
+    level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  })
+);
+
+// MongoDB transport
+transports.push(
+  new winston.transports.MongoDB({
+    db: MONGODB_URL,
+    collection: "logs",
+    format: mongoFormat,
+    level: "info",
+    options: {
+      useUnifiedTopology: true,
+    },
+    // Store metadata in the log document
+    metaKey: "metadata",
+  })
+);
+
+// Create the logger instance
+const logger = winston.createLogger({
+  level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports,
+  // Handle uncaught exceptions
+  exceptionHandlers: [
+    new winston.transports.Console({
+      format: consoleFormat,
+    }),
+  ],
+  // Handle unhandled promise rejections
+  rejectionHandlers: [
+    new winston.transports.Console({
+      format: consoleFormat,
+    }),
+  ],
+  // Exit on handled exceptions
+  exitOnError: false,
+});
+
+export default logger;
