@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config({ quiet: true });
 
 // Initialize global logger (must be after dotenv config)
-import "./src/logger";
+import "./src/app/config/logger";
 logger.info("[SERVER] - init dotenv");
 logger.info("[SERVER] - init logger");
 

@@ -1,5 +1,11 @@
 import winston from "winston";
 import "winston-mongodb";
+import { Logger } from "winston";
+
+// Extend the global namespace to include our logger
+declare global {
+  var logger: Logger;
+}
 
 // MongoDB connection URL from environment or default
 const MONGODB_URL = process.env.DATABASE_URL || "mongodb://localhost:27017/mern_template";
@@ -70,5 +76,8 @@ const logger = winston.createLogger({
   // Exit on handled exceptions
   exitOnError: false,
 });
+
+// Make logger available globally
+global.logger = logger;
 
 export default logger;
