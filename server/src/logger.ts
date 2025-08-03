@@ -1,4 +1,4 @@
-import logger from "./config/logger";
+import logger from "./app/config/logger";
 import { Logger } from "winston";
 
 // Extend the global namespace to include our logger

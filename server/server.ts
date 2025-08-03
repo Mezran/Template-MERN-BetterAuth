@@ -8,11 +8,11 @@ import "./src/logger";
 logger.info("[SERVER] - init dotenv");
 logger.info("[SERVER] - init logger");
 
-import app from "./src/app";
+import app from "./src/app/app";
 logger.info(`[SERVER] - init app`);
 
 // Import database connection
-import { connectToMongoDB, disconnectFromMongoDB } from "./src/config/database";
+import { connectToMongoDB, disconnectFromMongoDB } from "./src/app/config/database";
 
 const PORT = process.env.PORT || 3000;
 
