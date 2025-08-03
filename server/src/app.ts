@@ -1,7 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 
 // import routes
-import _rootRoutes from "../api/_root/_root.routes";
+import _rootRoutes from "./api/_root/_root.routes";
 
 const app: Application = express();
 

@@ -8,7 +8,7 @@ import "./src/logger";
 logger.info("[SERVER] - init dotenv");
 logger.info("[SERVER] - init logger");
 
-import app from "./src/app/app";
+import app from "./src/app";
 logger.info(`[SERVER] - init app`);
 
 // Import database connection
