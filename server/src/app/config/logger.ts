@@ -1,55 +1,26 @@
 import winston from "winston";
-import "winston-mongodb";
 import { Logger } from "winston";
 
 // Extend the global namespace to include our logger
 declare global {
   var logger: Logger;
 }
-
-// MongoDB connection URL from environment or default
-const MONGODB_URL = process.env.MONGODB_URI || "mongodb://localhost:27017/mern_template";
-
 // Custom format for console logging
+// Custom format for console output
 const consoleFormat = winston.format.combine(
-  winston.format.timestamp({
-    format: "YYYY-MM-DD HH:mm:ss",
-  }),
-  winston.format.errors({ stack: true }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.colorize(),
-  winston.format.printf(({ timestamp, level, message, stack }) => {
-    return `${timestamp} [${level}]: ${stack || message}`;
+  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    const metaString = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : "";
+    return `[${timestamp}] ${level}: ${message} ${metaString}`;
   })
 );
 
-// Custom format for MongoDB logging
-const mongoFormat = winston.format.combine(
-  winston.format.timestamp(),
-  winston.format.errors({ stack: true }),
-  winston.format.json()
-);
-
-// Create transports array
-const transports: winston.transport[] = [];
-
-// Console transport
-transports.push(
-  new winston.transports.Console({
-    format: consoleFormat,
-    level: "info",
-  })
-);
-
-// MongoDB transport
-transports.push(
-  new winston.transports.MongoDB({
-    db: MONGODB_URL,
-    collection: "logs",
-    format: mongoFormat,
-    level: "info",
-    // Store metadata in the log document
-    metaKey: "metadata",
-  })
+// Custom format for file output
+const fileFormat = winston.format.combine(
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+  winston.format.json(),
+  winston.format.prettyPrint()
 );
 
 // Create the logger instance
@@ -60,7 +31,29 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  transports,
+  transports: [
+    // Console transport
+    new winston.transports.Console({
+      format: consoleFormat,
+      level: process.env.NODE_ENV === "production" ? "warn" : "debug",
+    }),
+
+    // File transports
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+
+    new winston.transports.File({
+      filename: "logs/all.log",
+      format: fileFormat,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    }),
+  ],
   // Handle uncaught exceptions
   exceptionHandlers: [
     new winston.transports.Console({
