@@ -8,7 +8,7 @@ declare global {
 }
 
 // MongoDB connection URL from environment or default
-const MONGODB_URL = process.env.DATABASE_URL || "mongodb://localhost:27017/mern_template";
+const MONGODB_URL = process.env.MONGODB_URI || "mongodb://localhost:27017/mern_template";
 
 // Custom format for console logging
 const consoleFormat = winston.format.combine(
@@ -36,7 +36,7 @@ const transports: winston.transport[] = [];
 transports.push(
   new winston.transports.Console({
     format: consoleFormat,
-    level: process.env.NODE_ENV === "production" ? "info" : "debug",
+    level: "info",
   })
 );
 
@@ -54,7 +54,7 @@ transports.push(
 
 // Create the logger instance
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === "production" ? "info" : "debug",
+  level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),

@@ -1,7 +1,10 @@
 console.log("server.ts starting");
 import dotenv from "dotenv";
 // Load environment variables from .env file
-dotenv.config({ quiet: true });
+dotenv.config({
+  quiet: true,
+  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+});
 
 // Initialize global logger (must be after dotenv config)
 import "./src/app/config/logger";
