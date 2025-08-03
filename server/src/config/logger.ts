@@ -1,5 +1,3 @@
-console.log("logger config");
-
 import winston from "winston";
 import "winston-mongodb";
 
@@ -43,9 +41,6 @@ transports.push(
     collection: "logs",
     format: mongoFormat,
     level: "info",
-    options: {
-      useUnifiedTopology: true,
-    },
     // Store metadata in the log document
     metaKey: "metadata",
   })
