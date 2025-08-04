@@ -13,6 +13,7 @@
     "test:health": "jest tests/api/_root/health.test.ts"
   },
   "dependencies": {
+    "better-auth": "^1.3.4",
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "mongoose": "^8.17.0",
