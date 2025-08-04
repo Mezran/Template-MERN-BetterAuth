@@ -1,9 +1,6 @@
 import request from "supertest";
-import app from "../../../src/app";
-import {
-  connectToMongoDB,
-  disconnectFromMongoDB,
-} from "../../../src/app/config/database";
+import app from "../../../app";
+import { connectToMongoDB, disconnectFromMongoDB } from "../../../app/config/database";
 
 describe("Health Endpoint", () => {
   beforeAll(async () => {
