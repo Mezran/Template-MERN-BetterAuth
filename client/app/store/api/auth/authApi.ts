@@ -28,8 +28,8 @@ interface User {
   name: string;
   image?: string | null;
   emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // Serialized as ISO string
+  updatedAt: string; // Serialized as ISO string
 }
 
 interface RegisterResponse {
@@ -50,11 +50,34 @@ interface SessionResponse {
     id: string;
     userId: string;
     token: string;
-    createdAt: Date;
-    updatedAt: Date;
-    expiresAt: Date;
+    createdAt: string; // Serialized as ISO string
+    updatedAt: string; // Serialized as ISO string
+    expiresAt: string; // Serialized as ISO string
   } | null;
 }
+
+// Helper function to transform dates in response objects
+const transformDates = (obj: any): any => {
+  if (!obj) return obj;
+
+  if (obj instanceof Date) {
+    return obj.toISOString();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(transformDates);
+  }
+
+  if (typeof obj === "object") {
+    const transformed: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      transformed[key] = transformDates(value);
+    }
+    return transformed;
+  }
+
+  return obj;
+};
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -69,7 +92,7 @@ export const authApi = createApi({
           if (result.error) {
             return { error: result.error };
           }
-          return { data: result.data as RegisterResponse };
+          return { data: transformDates(result.data) };
         } catch (error) {
           return { error: { message: "Registration failed", error } };
         }
@@ -85,7 +108,7 @@ export const authApi = createApi({
           if (result.error) {
             return { error: result.error };
           }
-          return { data: result.data as LoginResponse };
+          return { data: transformDates(result.data) };
         } catch (error) {
           return { error: { message: "Login failed", error } };
         }
@@ -101,7 +124,7 @@ export const authApi = createApi({
           if (result.error) {
             return { error: result.error };
           }
-          return { data: result.data as SessionResponse };
+          return { data: transformDates(result.data) };
         } catch (error) {
           return { error: { message: "Failed to get session", error } };
         }

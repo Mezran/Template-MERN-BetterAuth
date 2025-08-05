@@ -17,6 +17,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+import cors from "cors";
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+global.logger.info("[APP] CORS configured");
+
 // better-auth routes
 import authRoutes from "./api/auth/auth.routes";
 app.all("/api/auth/*", authRoutes);
