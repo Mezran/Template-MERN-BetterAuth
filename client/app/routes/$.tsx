@@ -36,11 +36,6 @@ export default function NotFound() {
             <Link to="/">
               <Button className="w-full">Go Home</Button>
             </Link>
-            <Link to="/dashboard">
-              <Button variant="outline" className="w-full">
-                Dashboard
-              </Button>
-            </Link>
           </div>
         </CardContent>
       </Card>

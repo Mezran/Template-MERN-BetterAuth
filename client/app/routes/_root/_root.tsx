@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../../shared/shadcn/components/ui/card";
 import { useGetSessionQuery } from "../../store/api/auth/authApi";
+import { Typography } from "~/shared/shadcn/components/ui/typography";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -26,13 +27,7 @@ export default function _Root() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Welcome to MERN Template</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          A modern full-stack application built with MongoDB, Express, React, and Node.js,
-          featuring BetterAuth for authentication.
-        </p>
-      </div>
+      <Typography variant="h2">Home page</Typography>
 
       {/* User Status Card */}
       <div className="max-w-md mx-auto">
@@ -71,42 +66,6 @@ export default function _Root() {
                 </Link>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Features Section */}
-      <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">🔐 Secure Authentication</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Built with BetterAuth for robust, secure user authentication.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">⚡ Modern Stack</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              React Router v7, RTK Query, TypeScript, and Tailwind CSS.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">🎨 Beautiful UI</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Styled with shadcn/ui components for a polished experience.
-            </p>
           </CardContent>
         </Card>
       </div>

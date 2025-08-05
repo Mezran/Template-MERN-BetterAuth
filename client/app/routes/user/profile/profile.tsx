@@ -255,13 +255,6 @@ export default function Profile() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">User ID</Label>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {session.user.id}
-                  </p>
-                </div>
-
-                <div>
                   <Label className="text-sm font-medium">Email Address</Label>
                   <p className="text-sm text-muted-foreground">{session.user.email}</p>
                 </div>
@@ -274,20 +267,6 @@ export default function Profile() {
                     ) : (
                       <span className="text-orange-600">❌ Not verified</span>
                     )}
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Account Created</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(session.user.createdAt)}
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Last Updated</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(session.user.updatedAt)}
                   </p>
                 </div>
 
