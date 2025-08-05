@@ -12,8 +12,23 @@ import {
 } from "../../../shared/shadcn/components/ui/card";
 import { Input } from "../../../shared/shadcn/components/ui/input";
 import { Label } from "../../../shared/shadcn/components/ui/label";
-import { useGetSessionQuery } from "../../../store/api/auth/authApi";
-import { profileUpdateSchema, type ProfileUpdateFormData } from "./profile.schema";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../shared/shadcn/components/ui/tabs";
+import {
+  useGetSessionQuery,
+  useUpdateUserMutation,
+  useChangePasswordMutation,
+} from "../../../store/api/auth/authApi";
+import {
+  accountUpdateSchema,
+  passwordChangeSchema,
+  type AccountUpdateFormData,
+  type PasswordChangeFormData,
+} from "./profile.schema";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,70 +39,109 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Profile() {
   const { data: session, refetch } = useGetSessionQuery();
-  const [isEditing, setIsEditing] = useState(false);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [updateError, setUpdateError] = useState<string>("");
+  const [updateUser] = useUpdateUserMutation();
+  const [changePassword] = useChangePasswordMutation();
+
+  // Account update form
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [accountUpdateSuccess, setAccountUpdateSuccess] = useState(false);
+  const [accountUpdateError, setAccountUpdateError] = useState<string>("");
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isDirty },
-  } = useForm<ProfileUpdateFormData>({
-    resolver: zodResolver(profileUpdateSchema),
+    register: registerAccount,
+    handleSubmit: handleAccountSubmit,
+    reset: resetAccount,
+    formState: { errors: accountErrors, isDirty: isAccountDirty },
+  } = useForm<AccountUpdateFormData>({
+    resolver: zodResolver(accountUpdateSchema),
     defaultValues: {
       name: "",
-      email: "",
     },
   });
 
-  // Reset form when session data loads
+  // Password change form
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
+  const [passwordChangeError, setPasswordChangeError] = useState<string>("");
+
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    reset: resetPassword,
+    formState: { errors: passwordErrors, isDirty: isPasswordDirty },
+  } = useForm<PasswordChangeFormData>({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Reset account form when session data loads
   useEffect(() => {
     if (session?.user) {
-      reset({
+      resetAccount({
         name: session.user.name,
-        email: session.user.email,
       });
     }
-  }, [session?.user, reset]);
+  }, [session?.user, resetAccount]);
 
-  const onSubmit = async (data: ProfileUpdateFormData) => {
+  const onAccountSubmit = async (data: AccountUpdateFormData) => {
     try {
-      setUpdateError("");
-      setUpdateSuccess(false);
+      setAccountUpdateError("");
+      setAccountUpdateSuccess(false);
 
-      // Here you would typically call an update profile API endpoint
-      // For now, we'll simulate success since the auth API doesn't include profile updates
-      console.log("Profile update data:", data);
+      await updateUser(data).unwrap();
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setUpdateSuccess(true);
-      setIsEditing(false);
+      setAccountUpdateSuccess(true);
+      setIsEditingAccount(false);
 
       // Refetch session to get updated data
       refetch();
 
       // Clear success message after 3 seconds
-      setTimeout(() => setUpdateSuccess(false), 3000);
+      setTimeout(() => setAccountUpdateSuccess(false), 3000);
     } catch (error: any) {
-      console.error("Profile update failed:", error);
-      setUpdateError(
+      console.error("Account update failed:", error);
+      setAccountUpdateError(
         error?.data?.message ||
           error?.message ||
-          "Failed to update profile. Please try again."
+          "Failed to update account. Please try again."
       );
     }
   };
 
-  const handleCancel = () => {
-    reset({
+  const onPasswordSubmit = async (data: PasswordChangeFormData) => {
+    try {
+      setPasswordChangeError("");
+      setPasswordChangeSuccess(false);
+
+      await changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }).unwrap();
+
+      setPasswordChangeSuccess(true);
+      resetPassword();
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setPasswordChangeSuccess(false), 3000);
+    } catch (error: any) {
+      console.error("Password change failed:", error);
+      setPasswordChangeError(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to change password. Please try again."
+      );
+    }
+  };
+
+  const handleAccountCancel = () => {
+    resetAccount({
       name: session?.user?.name || "",
-      email: session?.user?.email || "",
     });
-    setIsEditing(false);
-    setUpdateError("");
+    setIsEditingAccount(false);
+    setAccountUpdateError("");
   };
 
   const formatDate = (date: Date | string) => {
@@ -120,127 +174,221 @@ export default function Profile() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
-              Update your personal details and account information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {updateSuccess && (
-              <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md">
-                Profile updated successfully!
-              </div>
-            )}
+      <Tabs defaultValue="account" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="password">Password</TabsTrigger>
+        </TabsList>
 
-            {updateError && (
-              <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
-                {updateError}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  {...register("name")}
-                  disabled={!isEditing}
-                  aria-invalid={!!errors.name}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
+        <TabsContent value="account" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Account Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>
+                  Update your personal details and account information.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {accountUpdateSuccess && (
+                  <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md">
+                    Account updated successfully!
+                  </div>
                 )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...register("email")}
-                  disabled={!isEditing}
-                  aria-invalid={!!errors.email}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                {accountUpdateError && (
+                  <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                    {accountUpdateError}
+                  </div>
                 )}
-              </div>
 
-              <div className="flex gap-2">
-                {!isEditing ? (
-                  <Button type="button" onClick={() => setIsEditing(true)}>
-                    Edit Profile
+                <form
+                  onSubmit={handleAccountSubmit(onAccountSubmit)}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      {...registerAccount("name")}
+                      disabled={!isEditingAccount}
+                      aria-invalid={!!accountErrors.name}
+                    />
+                    {accountErrors.name && (
+                      <p className="text-sm text-destructive">
+                        {accountErrors.name.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    {!isEditingAccount ? (
+                      <Button type="button" onClick={() => setIsEditingAccount(true)}>
+                        Edit Account
+                      </Button>
+                    ) : (
+                      <>
+                        <Button type="submit" disabled={!isAccountDirty}>
+                          Save Changes
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleAccountCancel}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Account Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+                <CardDescription>Read-only account details and status.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">User ID</Label>
+                  <p className="text-sm text-muted-foreground font-mono">
+                    {session.user.id}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Email Address</Label>
+                  <p className="text-sm text-muted-foreground">{session.user.email}</p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Email Verification Status</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {session.user.emailVerified ? (
+                      <span className="text-green-600">✅ Verified</span>
+                    ) : (
+                      <span className="text-orange-600">❌ Not verified</span>
+                    )}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Account Created</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(session.user.createdAt)}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Last Updated</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDate(session.user.updatedAt)}
+                  </p>
+                </div>
+
+                {session.user.image && (
+                  <div>
+                    <Label className="text-sm font-medium">Profile Image</Label>
+                    <img
+                      src={session.user.image}
+                      alt="Profile"
+                      className="w-16 h-16 rounded-full mt-2"
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="password" className="space-y-6">
+          <Card className="max-w-2xl">
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>
+                Update your password to keep your account secure.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {passwordChangeSuccess && (
+                <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md">
+                  Password changed successfully!
+                </div>
+              )}
+
+              {passwordChangeError && (
+                <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                  {passwordChangeError}
+                </div>
+              )}
+
+              <form
+                onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+                className="space-y-4"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    {...registerPassword("currentPassword")}
+                    aria-invalid={!!passwordErrors.currentPassword}
+                  />
+                  {passwordErrors.currentPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordErrors.currentPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    {...registerPassword("newPassword")}
+                    aria-invalid={!!passwordErrors.newPassword}
+                  />
+                  {passwordErrors.newPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordErrors.newPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    {...registerPassword("confirmPassword")}
+                    aria-invalid={!!passwordErrors.confirmPassword}
+                  />
+                  {passwordErrors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordErrors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={!isPasswordDirty}>
+                    Change Password
                   </Button>
-                ) : (
-                  <>
-                    <Button type="submit" disabled={!isDirty}>
-                      Save Changes
-                    </Button>
-                    <Button type="button" variant="outline" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                  </>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Account Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Read-only account details and status.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">User ID</Label>
-              <p className="text-sm text-muted-foreground font-mono">{session.user.id}</p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Email Verification Status</Label>
-              <p className="text-sm text-muted-foreground">
-                {session.user.emailVerified ? (
-                  <span className="text-green-600">✅ Verified</span>
-                ) : (
-                  <span className="text-orange-600">❌ Not verified</span>
-                )}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Account Created</Label>
-              <p className="text-sm text-muted-foreground">
-                {formatDate(session.user.createdAt)}
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Last Updated</Label>
-              <p className="text-sm text-muted-foreground">
-                {formatDate(session.user.updatedAt)}
-              </p>
-            </div>
-
-            {session.user.image && (
-              <div>
-                <Label className="text-sm font-medium">Profile Image</Label>
-                <img
-                  src={session.user.image}
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full mt-2"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <Button type="button" variant="outline" onClick={() => resetPassword()}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -22,6 +22,23 @@ interface LoginRequest {
   password: string;
 }
 
+interface UpdateUserRequest {
+  name: string;
+}
+
+interface UpdateUserResponse {
+  user: User;
+}
+
+interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+interface ChangePasswordResponse {
+  success: boolean;
+}
+
 interface User {
   id: string;
   email: string;
@@ -147,6 +164,38 @@ export const authApi = createApi({
       },
       invalidatesTags: ["Auth", "Session"],
     }),
+
+    // Update user endpoint
+    updateUser: builder.mutation<UpdateUserResponse, UpdateUserRequest>({
+      queryFn: async (userData) => {
+        try {
+          const result = await authClient.updateUser(userData);
+          if (result.error) {
+            return { error: result.error };
+          }
+          return { data: transformDates(result.data) };
+        } catch (error) {
+          return { error: { message: "Failed to update user", error } };
+        }
+      },
+      invalidatesTags: ["Session"],
+    }),
+
+    // Change password endpoint
+    changePassword: builder.mutation<ChangePasswordResponse, ChangePasswordRequest>({
+      queryFn: async (passwordData) => {
+        try {
+          const result = await authClient.changePassword(passwordData);
+          if (result.error) {
+            return { error: result.error };
+          }
+          return { data: transformDates(result.data) };
+        } catch (error) {
+          return { error: { message: "Failed to change password", error } };
+        }
+      },
+      invalidatesTags: ["Session"],
+    }),
   }),
 });
 
@@ -156,4 +205,6 @@ export const {
   useLoginMutation,
   useGetSessionQuery,
   useLogoutMutation,
+  useUpdateUserMutation,
+  useChangePasswordMutation,
 } = authApi;
