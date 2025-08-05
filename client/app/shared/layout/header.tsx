@@ -1,5 +1,14 @@
 import { Link } from "react-router";
 import { Button } from "../shadcn/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../shadcn/components/ui/dropdown-menu";
 import { useGetSessionQuery, useLogoutMutation } from "../../store/api/auth/authApi";
 
 export function Header() {
@@ -12,6 +21,15 @@ export function Header() {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
@@ -28,9 +46,6 @@ export function Header() {
                 <Link to="/dashboard">
                   <Button variant="ghost">Dashboard</Button>
                 </Link>
-                <Link to="/profile">
-                  <Button variant="ghost">Profile</Button>
-                </Link>
               </div>
             )}
           </div>
@@ -43,9 +58,41 @@ export function Header() {
                 <span className="text-sm text-muted-foreground">
                   Welcome, {session.user.name}
                 </span>
-                <Button variant="outline" onClick={handleLogout}>
-                  Logout
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={session.user.image || ""}
+                          alt={session.user.name}
+                        />
+                        <AvatarFallback>{getInitials(session.user.name)}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {session.user.name}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {session.user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
