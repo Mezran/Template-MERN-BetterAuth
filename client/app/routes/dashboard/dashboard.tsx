@@ -1,24 +1,31 @@
-import type { Route } from "./+types/dashboard";
-import { useGetSessionQuery } from "../../store/api/auth/authApi";
-import { Typography } from "~/shared/shadcn/components/ui/typography";
+import { SidebarProvider } from "~/shared/shadcn/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarTrigger,
+  SidebarInset,
+} from "../../shared/shadcn/components/ui/sidebar";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Dashboard - MERN Template" },
-    { name: "description", content: "User dashboard" },
-  ];
-}
+import { Separator } from "../../shared/shadcn/components/ui/separator";
+import { AppSidebar } from "./dashboard-sidebar";
 
-export default function Dashboard() {
-  const { data: session } = useGetSessionQuery();
-
+export default function Page() {
   return (
-    <div className="space-y-6">
-      <div>
-        <Typography variant="h2" className="mb-2">
-          Dashboard
-        </Typography>
-      </div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <SidebarTrigger className="-ml-1" />
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {Array.from({ length: 24 }).map((_, index) => (
+            <div
+              key={index}
+              className="bg-muted/50 aspect-video h-12 w-full rounded-lg"
+            />
+          ))}
+        </div>
+        last content
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
