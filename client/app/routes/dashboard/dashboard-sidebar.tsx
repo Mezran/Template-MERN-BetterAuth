@@ -16,6 +16,7 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarMenuAction,
+  SidebarSeparator,
 } from "../../shared/shadcn/components/ui/sidebar";
 
 import {
@@ -141,19 +142,67 @@ const data = {
       icon: Settings2,
       items: [
         {
-          title: "General",
+          title: "Generala",
           url: "#",
         },
         {
-          title: "Team",
+          title: "Teama",
           url: "#",
         },
         {
-          title: "Billing",
+          title: "Billinga",
           url: "#",
         },
         {
-          title: "Limits",
+          title: "Limitsa",
+          url: "#",
+        },
+        {
+          title: "Generalb",
+          url: "#",
+        },
+        {
+          title: "Teamb",
+          url: "#",
+        },
+        {
+          title: "Billingb",
+          url: "#",
+        },
+        {
+          title: "Limitsb",
+          url: "#",
+        },
+        {
+          title: "Generalc",
+          url: "#",
+        },
+        {
+          title: "Teamc",
+          url: "#",
+        },
+        {
+          title: "Billingc",
+          url: "#",
+        },
+        {
+          title: "Limitsc",
+          url: "#",
+        },
+        {
+          title: "Generald",
+          url: "#",
+        },
+        {
+          title: "Teamd",
+          url: "#",
+        },
+        {
+          title: "Billingd",
+          url: "#",
+        },
+        {
+          title: "Limitsd",
           url: "#",
         },
       ],
@@ -184,23 +233,24 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
       <SidebarGroup className="min-h-4rem p-5">
         <div className="flex items-center space-x-4">Z</div>
       </SidebarGroup>
-      <SidebarGroup>
+      <SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem key={"SidebarTrigger"}>
               <SidebarMenuButton asChild>
-                <SidebarTrigger />
+                <SidebarTrigger className="justify-end" />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
-      </SidebarGroup>
-      <SidebarContent className="gap-0">
+      </SidebarHeader>
+      <SidebarSeparator />
+      {/* main content */}
+      <SidebarContent>
         {/* We create a collapsible SidebarGroup for each parent. */}
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
   );
 }
