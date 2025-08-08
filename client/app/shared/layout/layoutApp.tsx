@@ -5,7 +5,7 @@ export default function LayoutApp() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="">
+      <main className="p-2">
         <Outlet />
       </main>
     </div>
