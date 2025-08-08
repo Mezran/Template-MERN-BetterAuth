@@ -184,7 +184,17 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
       <SidebarGroup className="min-h-4rem p-5">
         <div className="flex items-center space-x-4">Z</div>
       </SidebarGroup>
-
+      <SidebarGroup>
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem key={"SidebarTrigger"}>
+              <SidebarMenuButton asChild>
+                <SidebarTrigger />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+      </SidebarGroup>
       <SidebarContent className="gap-0">
         {/* We create a collapsible SidebarGroup for each parent. */}
         <NavMain items={data.navMain} />

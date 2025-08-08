@@ -3,7 +3,6 @@ import {
   Sidebar,
   SidebarHeader,
   SidebarContent,
-  SidebarTrigger,
   SidebarInset,
 } from "../../shared/shadcn/components/ui/sidebar";
 
@@ -15,7 +14,6 @@ export default function Page() {
     <SidebarProvider>
       <DashboardSidebar />
       <SidebarInset>
-        <SidebarTrigger className="-ml-1" />
         <div className="flex flex-1 flex-col gap-4 p-4">
           {Array.from({ length: 24 }).map((_, index) => (
             <div
