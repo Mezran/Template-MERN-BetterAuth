@@ -8,12 +8,12 @@ import {
 } from "../../shared/shadcn/components/ui/sidebar";
 
 import { Separator } from "../../shared/shadcn/components/ui/separator";
-import { AppSidebar } from "./dashboard-sidebar";
+import { DashboardSidebar } from "./dashboard-sidebar";
 
 export default function Page() {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <DashboardSidebar />
       <SidebarInset>
         <SidebarTrigger className="-ml-1" />
         <div className="flex flex-1 flex-col gap-4 p-4">
