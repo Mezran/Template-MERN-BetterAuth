@@ -20,7 +20,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 import cors from "cors";
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:6789",
+      process.env.CLIENT_URL as string,
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })

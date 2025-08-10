@@ -7,6 +7,13 @@ export default function RootLayout() {
     <Provider store={store}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="screens/loginRegister"
+          options={{
+            title: "Login / Register",
+            presentation: "modal",
+          }}
+        />
       </Stack>
     </Provider>
   );

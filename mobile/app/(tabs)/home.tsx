@@ -1,36 +1,86 @@
+import React, { useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setUser, setLoading } from "../store/store";
+import { setUser, setLoading, setAuthChecking, logout } from "../store/store";
+import { authClient } from "../shared/lib/auth";
+import WelcomeMessage from "../shared/components/WelcomeMessage";
 
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
-  const { user, isLoading } = useAppSelector((state) => state.app);
+  const { user, isLoading, isAuthenticated, isCheckingAuth } = useAppSelector(
+    (state) => state.app
+  );
 
-  const handleSetUser = () => {
-    dispatch(setUser(user ? null : "John Doe"));
+  // Check session when app loads
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    dispatch(setAuthChecking(true));
+    try {
+      const result = await authClient.getSession();
+
+      if (result.data?.user) {
+        dispatch(setUser(result.data.user.email));
+      } else {
+        dispatch(setUser(null));
+      }
+    } catch (error) {
+      console.error("Session check failed:", error);
+      dispatch(setUser(null));
+    } finally {
+      dispatch(setAuthChecking(false));
+    }
   };
 
-  const toggleLoading = () => {
-    dispatch(setLoading(!isLoading));
+  const handleLogout = async () => {
+    dispatch(setLoading(true));
+    try {
+      await authClient.signOut();
+      dispatch(logout());
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleRefreshSession = () => {
+    checkSession();
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
-      <Text style={styles.subtitle}>Welcome to the Home tab!</Text>
 
-      <View style={styles.reduxDemo}>
-        <Text style={styles.demoTitle}>Redux Demo:</Text>
+      <WelcomeMessage userEmail={user} isLoading={isCheckingAuth} />
+
+      {isAuthenticated && (
+        <View style={styles.userActions}>
+          <TouchableOpacity style={styles.button} onPress={handleRefreshSession}>
+            <Text style={styles.buttonText}>Refresh Session</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.button, styles.logoutButton]}
+            onPress={handleLogout}
+            disabled={isLoading}
+          >
+            <Text style={[styles.buttonText, styles.logoutButtonText]}>
+              {isLoading ? "Logging out..." : "Logout"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Debug Info */}
+      <View style={styles.debugInfo}>
+        <Text style={styles.debugTitle}>Debug Info:</Text>
         <Text>User: {user || "Not logged in"}</Text>
+        <Text>Authenticated: {isAuthenticated ? "Yes" : "No"}</Text>
+        <Text>Checking Auth: {isCheckingAuth ? "Yes" : "No"}</Text>
         <Text>Loading: {isLoading ? "Yes" : "No"}</Text>
-
-        <TouchableOpacity style={styles.button} onPress={handleSetUser}>
-          <Text style={styles.buttonText}>{user ? "Logout" : "Login as John Doe"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={toggleLoading}>
-          <Text style={styles.buttonText}>Toggle Loading</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -48,34 +98,47 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
+    color: "#333",
   },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 30,
-  },
-  reduxDemo: {
+  userActions: {
+    marginTop: 20,
+    gap: 12,
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    width: "100%",
-  },
-  demoTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
   },
   button: {
-    backgroundColor: "#007AFF",
-    padding: 12,
+    backgroundColor: "#007bff",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 8,
-    marginTop: 10,
     minWidth: 150,
+    alignItems: "center",
+  },
+  logoutButton: {
+    backgroundColor: "#dc3545",
   },
   buttonText: {
-    color: "white",
-    textAlign: "center",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  logoutButtonText: {
+    color: "#fff",
+  },
+  debugInfo: {
+    position: "absolute",
+    bottom: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#f8f9fa",
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  debugTitle: {
+    fontSize: 14,
     fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
   },
 });
