@@ -14,12 +14,9 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useRegisterMutation } from "../../../store/api/authApi";
-import { useAppDispatch } from "../../../store/hooks";
-import { setUser } from "../../../store/store";
 import { registerSchema, RegisterFormData } from "./register.schema";
 
 export default function RegisterScreen() {
-  const dispatch = useAppDispatch();
   const [register, { isLoading }] = useRegisterMutation();
 
   // Form setup
@@ -37,9 +34,9 @@ export default function RegisterScreen() {
       const result = await register(data).unwrap();
 
       if (result?.user) {
-        dispatch(setUser(result.user.email));
         Alert.alert("Success", "Account created successfully!");
         router.back();
+        // Session will be automatically refetched by RTK Query
       }
     } catch (error: any) {
       Alert.alert("Registration Failed", error?.message || "An error occurred");

@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
-  baseURL: "http://localhost:6789", // Better-auth server URL
+  baseURL: "http://localhost:3000", // Better-auth server URL
   credentials: "include", // Include cookies in requests
 });
 

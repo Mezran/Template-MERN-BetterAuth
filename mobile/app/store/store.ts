@@ -2,19 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { authApi } from "./api/authApi";
 
-// Example app slice
+// Simplified app slice - authentication state will be derived from session API
 interface AppState {
   isLoading: boolean;
-  user: string | null;
-  isAuthenticated: boolean;
-  isCheckingAuth: boolean;
 }
 
 const initialState: AppState = {
   isLoading: false,
-  user: null,
-  isAuthenticated: false,
-  isCheckingAuth: true,
 };
 
 const appSlice = createSlice({
@@ -24,21 +18,10 @@ const appSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setUser: (state, action: PayloadAction<string | null>) => {
-      state.user = action.payload;
-      state.isAuthenticated = !!action.payload;
-    },
-    setAuthChecking: (state, action: PayloadAction<boolean>) => {
-      state.isCheckingAuth = action.payload;
-    },
-    logout: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-    },
   },
 });
 
-export const { setLoading, setUser, setAuthChecking, logout } = appSlice.actions;
+export const { setLoading } = appSlice.actions;
 
 // Configure store
 export const store = configureStore({

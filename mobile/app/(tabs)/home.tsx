@@ -1,17 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setUser, setLoading, setAuthChecking, logout } from "../store/store";
+import { setLoading } from "../store/store";
 import { useGetSessionQuery, useLogoutMutation } from "../store/api/authApi";
 import WelcomeMessage from "../shared/components/WelcomeMessage";
 
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
-  const { user, isLoading, isAuthenticated, isCheckingAuth } = useAppSelector(
-    (state) => state.app
-  );
+  const { isLoading } = useAppSelector((state) => state.app);
 
-  // RTK Query hooks
+  // RTK Query hooks - session data is the source of truth for auth state
   const {
     data: sessionData,
     isLoading: isSessionLoading,
@@ -19,28 +17,15 @@ export default function HomeScreen() {
   } = useGetSessionQuery();
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
 
-  // Check session when app loads
-  useEffect(() => {
-    if (sessionData) {
-      if (sessionData.user) {
-        dispatch(setUser(sessionData.user.email));
-      } else {
-        dispatch(setUser(null));
-      }
-      dispatch(setAuthChecking(false));
-    }
-  }, [sessionData, dispatch]);
-
-  // Set initial loading state
-  useEffect(() => {
-    dispatch(setAuthChecking(isSessionLoading));
-  }, [isSessionLoading, dispatch]);
+  // Derive auth state from session data
+  const user = sessionData?.user;
+  const isAuthenticated = !!user;
 
   const handleLogout = async () => {
     dispatch(setLoading(true));
     try {
       await logoutMutation().unwrap();
-      dispatch(logout());
+      // Session will be automatically refetched by RTK Query
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -56,7 +41,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
 
-      <WelcomeMessage userEmail={user} isLoading={isCheckingAuth} />
+      <WelcomeMessage userEmail={user?.email || null} isLoading={isSessionLoading} />
 
       {isAuthenticated && (
         <View style={styles.userActions}>
@@ -85,10 +70,10 @@ export default function HomeScreen() {
       {/* Debug Info */}
       <View style={styles.debugInfo}>
         <Text style={styles.debugTitle}>Debug Info:</Text>
-        <Text>User: {user || "Not logged in"}</Text>
+        <Text>User: {user?.email || "Not logged in"}</Text>
         <Text>Authenticated: {isAuthenticated ? "Yes" : "No"}</Text>
-        <Text>Checking Auth: {isCheckingAuth ? "Yes" : "No"}</Text>
-        <Text>Loading: {isLoading ? "Yes" : "No"}</Text>
+        <Text>Session Loading: {isSessionLoading ? "Yes" : "No"}</Text>
+        <Text>App Loading: {isLoading ? "Yes" : "No"}</Text>
       </View>
     </View>
   );

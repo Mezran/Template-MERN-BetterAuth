@@ -150,14 +150,15 @@ export const authApi = createApi({
     }),
 
     // Logout endpoint
-    logout: builder.mutation<void, void>({
+    logout: builder.mutation<{ success: boolean }, void>({
       queryFn: async () => {
         try {
           const result = await authClient.signOut();
+          console.log(result);
           if (result.error) {
             return { error: result.error };
           }
-          return { data: undefined };
+          return { data: result.data || { success: true } };
         } catch (error) {
           return { error: { message: "Logout failed", error } };
         }
