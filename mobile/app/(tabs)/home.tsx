@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setUser, setLoading, setAuthChecking, logout } from "../store/store";
-import { authClient } from "../shared/lib/auth";
+import { useGetSessionQuery, useLogoutMutation } from "../store/api/authApi";
 import WelcomeMessage from "../shared/components/WelcomeMessage";
 
 export default function HomeScreen() {
@@ -11,33 +11,35 @@ export default function HomeScreen() {
     (state) => state.app
   );
 
+  // RTK Query hooks
+  const {
+    data: sessionData,
+    isLoading: isSessionLoading,
+    refetch: refetchSession,
+  } = useGetSessionQuery();
+  const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
+
   // Check session when app loads
   useEffect(() => {
-    checkSession();
-  }, []);
-
-  const checkSession = async () => {
-    dispatch(setAuthChecking(true));
-    try {
-      const result = await authClient.getSession();
-
-      if (result.data?.user) {
-        dispatch(setUser(result.data.user.email));
+    if (sessionData) {
+      if (sessionData.user) {
+        dispatch(setUser(sessionData.user.email));
       } else {
         dispatch(setUser(null));
       }
-    } catch (error) {
-      console.error("Session check failed:", error);
-      dispatch(setUser(null));
-    } finally {
       dispatch(setAuthChecking(false));
     }
-  };
+  }, [sessionData, dispatch]);
+
+  // Set initial loading state
+  useEffect(() => {
+    dispatch(setAuthChecking(isSessionLoading));
+  }, [isSessionLoading, dispatch]);
 
   const handleLogout = async () => {
     dispatch(setLoading(true));
     try {
-      await authClient.signOut();
+      await logoutMutation().unwrap();
       dispatch(logout());
     } catch (error) {
       console.error("Logout failed:", error);
@@ -47,7 +49,7 @@ export default function HomeScreen() {
   };
 
   const handleRefreshSession = () => {
-    checkSession();
+    refetchSession();
   };
 
   return (
@@ -58,17 +60,23 @@ export default function HomeScreen() {
 
       {isAuthenticated && (
         <View style={styles.userActions}>
-          <TouchableOpacity style={styles.button} onPress={handleRefreshSession}>
-            <Text style={styles.buttonText}>Refresh Session</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleRefreshSession}
+            disabled={isSessionLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isSessionLoading ? "Refreshing..." : "Refresh Session"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.button, styles.logoutButton]}
             onPress={handleLogout}
-            disabled={isLoading}
+            disabled={isLoggingOut}
           >
             <Text style={[styles.buttonText, styles.logoutButtonText]}>
-              {isLoading ? "Logging out..." : "Logout"}
+              {isLoggingOut ? "Logging out..." : "Logout"}
             </Text>
           </TouchableOpacity>
         </View>

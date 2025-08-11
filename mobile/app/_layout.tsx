@@ -8,9 +8,16 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="screens/loginRegister"
+          name="screens/auth/login/login"
           options={{
-            title: "Login / Register",
+            title: "Sign In",
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="screens/auth/register/register"
+          options={{
+            title: "Sign Up",
             presentation: "modal",
           }}
         />

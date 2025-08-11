@@ -1,7 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-
-// Example slice for demonstration
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { authApi } from "./api/authApi";
 
 // Example app slice
 interface AppState {
@@ -45,7 +44,9 @@ export const { setLoading, setUser, setAuthChecking, logout } = appSlice.actions
 export const store = configureStore({
   reducer: {
     app: appSlice.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

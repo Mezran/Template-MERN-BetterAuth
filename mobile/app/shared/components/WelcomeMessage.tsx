@@ -13,7 +13,7 @@ export default function WelcomeMessage({
   isLoading = false,
 }: WelcomeMessageProps) {
   const handleLoginPress = () => {
-    router.push("screens/loginRegister" as any);
+    router.push("screens/auth/login/login" as any);
   };
 
   if (isLoading) {
