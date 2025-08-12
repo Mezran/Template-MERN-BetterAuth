@@ -9,7 +9,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "storybook-generate": "sb-rn-get-stories"
+    "storybook-generate": "sb-rn-get-stories",
+    "sb:ios": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --ios",
+    "sb:android": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --android",
+    "sb:web": "EXPO_PUBLIC_STORYBOOK_ENABLED=true expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
